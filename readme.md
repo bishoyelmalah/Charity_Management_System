@@ -25,4 +25,4 @@ The Charity Management System is a Python-based project designed to streamline t
 - Advanced reporting and analytics features.
 
 ## Author
-This project was developed as part of the Python - Semester 2 course at AAST.
+This project was developed as part of the Python Course at AAST.
