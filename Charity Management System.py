@@ -87,17 +87,20 @@ class Donation:
         print("\n===============================================")
         print("============= Adding New Donation =============")
         print("===============================================\n")
-        self.amount = int(get_required_input("Enter the amount of Donation: "))
-        while self.amount <= 0:
-            print("Amount must be a positive number.")
+        try:
             self.amount = int(get_required_input("Enter the amount of Donation: "))
-        self.type = get_required_input("Enter the type of Donation (Cash / Non-Cash): ")
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            while self.amount <= 0:
+                print("Amount must be a positive number.")
+                self.amount = int(get_required_input("Enter the amount of Donation: "))
+            self.type = get_required_input("Enter the type of Donation (Cash / Non-Cash): ")
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            user.donations[current_time] = self
+            user.total_donations += self.amount
+            donations_DB[current_time] = {user.name: self}
+            print("\n -------- Donation added Successfully -------- \n")
+        except Exception as e:
+            print(f"{e}")
 
-        user.donations[current_time] = self
-        user.total_donations += self.amount
-        donations_DB[current_time] = {user.name: self}
-        print("\n -------- Donation added Successfully -------- \n")
 
 
 class Beneficiary:
@@ -135,10 +138,12 @@ class Beneficiary:
         print("\n ------- Beneficiary information updated successfully -------\n")
 
     def allocate_aid(self):
-        amount = int(get_required_input("Enter the amound of Aid: ").strip())
-        self.aids += amount
-        print("\n --------- Aid Allocated Successfully ---------\n")
-
+        try:
+            amount = int(get_required_input("Enter the amound of Aid: ").strip())
+            self.aids += amount
+            print("\n --------- Aid Allocated Successfully ---------\n")
+        except Exception as e:
+            print(e)
 
 
 
@@ -270,10 +275,13 @@ while(True):
         user.get_info()
     elif (choice == "3"):
         # Regisiter Beneficiary
-        income = int(get_required_input("Enter Beneficiary's Income (Required): "))
-        if is_ben_eligible(income):
-            ben = Beneficiary()
-            ben.add_ben(income)
+        try:
+            income = int(get_required_input("Enter Beneficiary's Income (Required): "))
+            if is_ben_eligible(income):
+                ben = Beneficiary()
+                ben.add_ben(income)
+        except Exception as e:
+            print(e)
     elif (choice == "4"):
         # Show/Edit Beneficiary Information
         ben = get_ben_auth()
