@@ -20,9 +20,10 @@ class Donor:
         print("=========== Adding New Donor ===========")
         print("========================================\n")
         self.name = get_required_input("Enter the Donor's Name (Required): ")
-        self.username = get_required_input("Enter a username for Donor's account (Required): ")
+        self.username = get_required_input("Enter a username for Donor's account (Required | Can't be changed): ")
         self.contact = get_required_input("Enter the Contact info - Email/Phone (Required): ")
         self.password = get_required_input("Enter a password for Donor's account (Required): ")
+        self.total_donations = 0
         self.donations = {}
         donors_DB[self.username] = self
         print("\n -------- Donor added Successfully --------\n")
@@ -35,7 +36,12 @@ class Donor:
             if key == "donations":
                 self.get_donations()
                 continue
-            print(f"{key.capitalize()}: {value}")
+            elif key == "password":
+                continue
+            elif key == "total_donations":
+                print(f"Total Donations: {value} $")
+            else:
+                print(f"{key.capitalize()}: {value}")
 
         change = get_required_input("\nDo you want to change any information? (y/n): ").lower()
         if change == 'y':
@@ -45,18 +51,17 @@ class Donor:
     def change_info(self):
         print(f"\nIf you don't want to change specific field leave it blank by pressing enter.\n")
         for key, value in self.__dict__.items():
-            if key == "donations":
-                continue
-            elif key == "username":
+            if key == "donations" or key == "username" or key == "total_donations":
                 continue
             elif key == "password":
                 change_pass = get_required_input(f"Change the Password (y/n): ").lower()
                 if change_pass == 'y':
                     self.change_pass(key)
                     break
-            change = input(f"Change {key.capitalize()} ({value}): ").strip()
-            if change != "":
-                setattr(self, key, change)
+            else:
+                change = input(f"Change {key.capitalize()} ({value}): ").strip()
+                if change != "":
+                    setattr(self, key, change)
 
 
     def change_pass(self, key):
@@ -90,6 +95,7 @@ class Donation:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         user.donations[current_time] = self
+        user.total_donations += self.amount
         donations_DB[current_time] = {user.name: self}
         print("\n -------- Donation added Successfully -------- \n")
 
@@ -100,13 +106,14 @@ class Beneficiary:
         print("=========== Adding New Beneficiary ===========")
         print("================================================\n")
         self.name = get_required_input("Enter the Beneficiary's Name (Required): ")
-        self.phone = get_required_input("Enter the Beneficiary's Phone Number (Required): ")
+        self.contact = get_required_input("Enter the Beneficiary's Contact - Email/Phone (Required): ")
         self.income = income
         self.aids = 0
         beneficiary_DB[self.name] = self
         print("\n -------- Beneficiary added Successfully -------- \n")
 
     def get_info(self):
+        print("\n")
         for key, value in self.__dict__.items():
             print(f" - {key.capitalize()}: {value}")
         change = get_required_input("\nDo you want to change any information? (y/n): ").lower()
@@ -182,12 +189,40 @@ def get_ben_auth():
     return beneficiary_DB[ben]
 
 
+def show_donors_report():
+    counter = 1
+    for donor in donors_DB.values():
+        print(f"\n ============== {counter} ==============")
+        for key, value in donor.__dict__.items():
+            if key == "password" or key == "donations":
+                continue
+            elif key == "total_donations":
+                print(f"Total Donations: {value} $")
+            else:
+                print(f"{key.capitalize()}: {value}")
+        counter += 1
+
+
+def show_ben_report():
+    counter = 1
+    for ben in beneficiary_DB.values():
+        print(f"\n ============== {counter} ==============")
+        for key, value in ben.__dict__.items():
+            if key == "aids":
+                print(f"Total Aids: {value}")
+            else:
+                print(f"{key.capitalize()}: {value}")
+
+
+
 def show_donations_report():
     for key, value in donations_DB.items():
         for donor, donation in value.items():
             print(f"{key} >> {donor}")
             print(f" - Amount: {donation.amount}")
             print(f" - Type: {donation.type}\n")
+
+
 
 def is_ben_eligible(income):
     if income <= 1000:
@@ -204,10 +239,10 @@ def get_report():
 
     if choice == "1":
         # Donors Report
-        print(donors_DB)
+        show_donors_report()
     elif choice == "2":
         # Beneficiaries Report
-        print(beneficiary_DB)
+        show_ben_report()
     elif choice == "3":
         # Donations Report
         show_donations_report()
